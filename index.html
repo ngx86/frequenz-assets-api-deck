@@ -382,10 +382,10 @@ function edgesConcentric() {
 /* ---------------- slide definitions ---------------- */
 const slideDefs = [
   {
-    section: '§01 · Prologue',
-    eyebrow: '§01 — Prologue',
-    title: 'Assets <i>API</i>',
-    lede: 'A read-only window onto the Frequenz Platform. <strong>Microgrids, gridpools, components</strong> — and the graph that binds them into a working system.',
+    section: '§01 · The Problem',
+    eyebrow: '§01 — The Problem',
+    title: 'A shared view<br>of what <i>exists</i>.',
+    lede: 'Frequenz manages complex energy systems made up of many components. Different services need to understand what exists and how it\'s connected. <strong>Without a shared view, every service builds its own version of reality.</strong>',
     scene: () => ({
       nodes: fSphere(N, 6.4),
       edges: [],
@@ -395,10 +395,10 @@ const slideDefs = [
     })
   },
   {
-    section: '§02 · Background',
-    eyebrow: '§02 — Background',
-    title: 'Defined in the app.<br>Served by the <i>API</i>.',
-    lede: 'Assets are created and managed centrally in the Frequenz App. The API exposes that truth — it does not create, it does not mutate. <strong>Read. Traverse. Reason.</strong>',
+    section: '§02 · What is the Assets API?',
+    eyebrow: '§02 — What is the Assets API?',
+    title: 'Read-only.<br><i>Structured.</i> Shared.',
+    lede: 'The Assets API is a read-only interface to everything that exists in the platform. It doesn\'t create or modify anything — it simply exposes a structured view of assets and their relationships. <strong>The platform defines reality. The API makes that reality usable.</strong>',
     scene: () => {
       const pos = fClusters(N, [
         new THREE.Vector3(-5.6, 0.5, 0),
@@ -421,26 +421,10 @@ const slideDefs = [
     }
   },
   {
-    section: '§03 · Purpose',
-    eyebrow: '§03 — Purpose',
-    title: 'A structural access layer<br>over the <i>asset graph</i>.',
-    lede: 'Not just retrieval. Context-rich relationships that let applications reason about topology in real time — microgrids, gridpools, components, and every interconnection between them.',
-    scene: () => {
-      const pos = fSphere(N, 4.6);
-      return {
-        nodes: pos,
-        edges: edgesNearest(pos, 3),
-        colors: Array(N).fill(CYAN),
-        camera: { pos: [1, 2, 12], look: [0, 0, 0] },
-        bloom: 1.25
-      };
-    }
-  },
-  {
-    section: '§04 · Why it matters',
-    eyebrow: '§04 — Why it matters',
-    title: 'From data provider<br>to <i>orchestration platform</i>.',
-    lede: 'Without a shared topology layer, every service rebuilds the asset model for itself. Models drift. Views diverge. <strong>It does not scale.</strong>',
+    section: '§03 · Why it matters',
+    eyebrow: '§03 — Why it matters',
+    title: 'From data provider<br>to <i>platform</i>.',
+    lede: 'This is what allows Frequenz to act like a platform, not just a data provider.',
     scene: () => {
       const pos = fHub(N, 5.4);
       const cs = Array(N).fill(CYAN);
@@ -455,10 +439,10 @@ const slideDefs = [
     }
   },
   {
-    section: '§04.1 · Single source of truth',
-    eyebrow: '§04.1 — Single source of truth',
-    title: 'One representation.<br>Every service.',
-    lede: 'No duplicate models. No diverging interpretations. No inconsistent views of the same grid. <strong>One graph. One truth.</strong>',
+    section: '§03.1 · Single source of truth',
+    eyebrow: '§03.1 — Single source of truth',
+    title: 'One representation.<br>Every <i>service</i>.',
+    lede: 'Everyone sees the same system. No duplication or conflicting models. <strong>One graph. One truth.</strong>',
     scene: () => {
       const pos = fSphere(N, 3.1);
       return {
@@ -471,10 +455,10 @@ const slideDefs = [
     }
   },
   {
-    section: '§04.2 · Decoupled evolution',
-    eyebrow: '§04.2 — Decoupled evolution',
-    title: 'UI owns lifecycle.<br>API owns the <i>contract</i>.',
-    lede: 'Downstream services depend on a stable interface — not on how assets are created upstream. Both sides evolve on their own clock.',
+    section: '§03.2 · Decoupling',
+    eyebrow: '§03.2 — Decoupling',
+    title: 'UI manages.<br>Services <i>consume</i>.',
+    lede: 'The UI manages assets. Other services just consume them. Both sides evolve independently — without breaking each other.',
     scene: () => {
       const pos = fLayers(N, [2.6, -2.6], 13, 5);
       const cs = [];
@@ -489,10 +473,10 @@ const slideDefs = [
     }
   },
   {
-    section: '§04.3 · Orchestration',
-    eyebrow: '§04.3 — Enabling orchestration',
-    title: 'Topology,<br>not just <i>metrics</i>.',
-    lede: 'Component-graph visualization. Gridpool optimization. Market-aware trading. Every one of them needs structure — not just measurements.',
+    section: '§03.3 · Enables orchestration',
+    eyebrow: '§03.3 — Enables orchestration',
+    title: 'Not just data.<br><i>Coordinated decisions.</i>',
+    lede: 'Not just data access — enables coordinated decisions across systems. Structure is what makes orchestration possible.',
     scene: () => {
       const pos = fGrid(N, 10, 1.25);
       return {
@@ -505,25 +489,25 @@ const slideDefs = [
     }
   },
   {
-    section: '§05 · Current status',
-    eyebrow: '§05 — Current status',
+    section: '§04 · What the API provides',
+    eyebrow: '§04 — What the API provides',
     title: 'Three lenses<br>on a <i>microgrid</i>.',
     extraHTML: `
       <div class="columns">
         <div class="col">
           <div class="num">01 / Overview</div>
           <h3>Identity</h3>
-          <p>Location, delivery area, and the context a microgrid lives in.</p>
+          <p>Basic info — who, where, and the context a microgrid lives in.</p>
         </div>
         <div class="col">
           <div class="num">02 / Components</div>
-          <h3>Inventory</h3>
-          <p>Batteries, inverters, chargers. Fetch all — or filter by type.</p>
+          <h3>Inside</h3>
+          <p>Batteries, inverters, chargers. Everything that lives inside the microgrid.</p>
         </div>
         <div class="col">
-          <div class="num">03 / Connectivity</div>
+          <div class="num">03 / Connections</div>
           <h3>Topology</h3>
-          <p>How the components are actually wired. The shape of the system.</p>
+          <p>How everything is linked together. The shape of the system.</p>
         </div>
       </div>
     `,
@@ -539,16 +523,16 @@ const slideDefs = [
     }
   },
   {
-    section: '§06 · Live example',
-    eyebrow: '§06 — Live example',
+    section: '§05 · From decision to hardware',
+    eyebrow: '§05 — From decision to hardware',
     title: 'Trading &nbsp;→&nbsp; Assets &nbsp;→&nbsp; <i>Dispatch</i>',
     extraHTML: `
       <div class="flow">
-        <div class="step"><span class="label">01 / Trading</span><h4>Intent</h4><p>Defines what should happen. Orders, schedules, commitments.</p></div>
+        <div class="step"><span class="label">01 / Trading</span><h4>Decides</h4><p>A decision is made — charge or discharge. <em>What</em> should happen.</p></div>
         <div class="arrow">→</div>
-        <div class="step"><span class="label">02 / Assets</span><h4>Mapping</h4><p>Resolves scope, components, connectivity. <em>Where</em> — and with what.</p></div>
+        <div class="step"><span class="label">02 / Assets</span><h4>Locates</h4><p>Where and with what? Identifies microgrid, components, connections. <em>Where</em> — and how.</p></div>
         <div class="arrow">→</div>
-        <div class="step"><span class="label">03 / Dispatch</span><h4>Execution</h4><p>Sends the commands to the actual hardware.</p></div>
+        <div class="step"><span class="label">03 / Dispatch</span><h4>Executes</h4><p>Sends the command to real devices. <em>How</em> it's done.</p></div>
       </div>
     `,
     scene: () => {
@@ -571,13 +555,26 @@ const slideDefs = [
     }
   },
   {
-    section: '§07 · Future work',
-    eyebrow: '§07 — Future work',
-    title: 'Expanding<br>the <i>graph</i>.',
+    section: '§06 · Current scope',
+    eyebrow: '§06 — Current scope',
+    title: 'A <i>foundation</i> layer.',
+    lede: 'Read-only. Focused on microgrids and components. Dependent on platform data quality. <strong>It\'s a foundation layer, not a full control system.</strong>',
+    scene: () => ({
+      nodes: fDome(N, 5),
+      edges: [],
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 1, 12], look: [0, 0, 0] },
+      bloom: 1.35
+    })
+  },
+  {
+    section: '§07 · What\'s next',
+    eyebrow: '§07 — What\'s next',
+    title: 'Beyond <i>microgrids</i>.',
     extraHTML: `
       <dl class="meta-grid">
-        <dt>Scope</dt><dd>Enterprises · Gridpools · Assigned microgrids · Schedules · Balancing accounts</dd>
-        <dt>Integrations</dt><dd>Notebooks · Trading applications · Component-graph visualizations</dd>
+        <dt>Expanding to</dt><dd>Enterprises · Gridpools · Schedules · Balancing accounts</dd>
+        <dt>Meaning</dt><dd>Moving from local system understanding to full platform coordination</dd>
       </dl>
     `,
     scene: () => {
@@ -594,46 +591,10 @@ const slideDefs = [
     }
   },
   {
-    section: '§08 · Architecture',
-    eyebrow: '§08 — Architecture & Access',
-    title: 'Service. Client. <i>Schema</i>.',
-    extraHTML: `
-      <dl class="meta-grid">
-        <dt>Service API</dt><dd>Closed source · platform-gated · the source of truth</dd>
-        <dt>Client SDK</dt><dd>Open · Python · <span class="mono">frequenz-client-assets-python</span></dd>
-        <dt>gRPC Schema</dt><dd>Open · <span class="mono">frequenz-api-assets</span> · bring your own backend</dd>
-        <dt>Docs</dt><dd>Public reference — structure, usage, definitions</dd>
-      </dl>
-    `,
-    scene: () => {
-      const pos = fConcentric();
-      return {
-        nodes: pos,
-        edges: edgesConcentric(),
-        colors: Array(N).fill(CYAN),
-        camera: { pos: [0, 6.5, 9], look: [0, 0, 0] },
-        bloom: 1.2
-      };
-    }
-  },
-  {
-    section: '§09 · Scope & Limits',
-    eyebrow: '§09 — Scope & Limitations',
-    title: 'Read-only,<br><i>by design</i>.',
-    lede: 'Detailed asset data for analytics and decision systems. No CRUD. Quality and timeliness track the platform underneath — <strong>garbage in, garbage out</strong>.',
-    scene: () => ({
-      nodes: fDome(N, 5),
-      edges: [],
-      colors: Array(N).fill(AMBER),
-      camera: { pos: [0, 1, 12], look: [0, 0, 0] },
-      bloom: 1.35
-    })
-  },
-  {
-    section: '§10 · Audience',
-    eyebrow: '§10 — Target audience',
-    title: 'Built for the developers<br><i>orchestrating the grid</i>.',
-    lede: 'Cloud application developers building microgrid orchestration, gridpool trading, and intelligent software on top of Frequenz platform data.',
+    section: '§08 · Takeaway',
+    eyebrow: '§08 — Takeaway',
+    title: 'Shared understanding.<br>Real <i>orchestration</i>.',
+    lede: 'The Assets API is what gives every service a shared understanding of the system — making real orchestration possible.',
     scene: () => ({
       nodes: fSpiral(N),
       edges: (() => { const e = []; for (let i = 0; i < N - 1; i++) e.push([i, i + 1]); return e; })(),
