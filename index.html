@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Assets API — Frequenz</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070d; --bg2:#0a0f1b;
+    --fg:#eef0f6; --fg-dim:#8992a6; --fg-mute:#4a5166;
+    --amber:#00ffce; --amber-hi:#7dffe3;
+    --cyan:#7df9ff; --cyan-dim:#4ac7d0;
+    --line:rgba(255,255,255,.08);
+    --line-strong:rgba(255,255,255,.16);
+    --display:"Sora", ui-sans-serif, system-ui, sans-serif;
+    --sans:"General Sans", "Helvetica Neue", system-ui, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;cursor:default}
+  canvas{display:block}
+  #bg-canvas{position:fixed;inset:0;z-index:0}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 95% 75% at 50% 55%,transparent 0%,transparent 42%,rgba(0,0,0,.55) 92%,rgba(0,0,0,.82) 100%)}
+  #grain{position:fixed;inset:-20%;z-index:3;pointer-events:none;opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .65 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+
+  /* chrome overlay */
+  #ui{position:fixed;inset:0;z-index:4;pointer-events:none}
+  .chrome{position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);font-weight:400}
+  .chrome.tl{top:32px;left:38px}
+  .chrome.tr{top:32px;right:38px;text-align:right}
+  .chrome.bl{bottom:32px;left:38px}
+  .chrome.br{bottom:32px;right:38px;text-align:right}
+  .chrome .divider{display:inline-block;width:24px;border-top:1px solid var(--line-strong);vertical-align:middle;margin:0 12px;transform:translateY(-2px)}
+  .chrome .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--amber);margin-right:10px;transform:translateY(-1px);box-shadow:0 0 12px var(--amber),0 0 24px rgba(0,255,206,.4)}
+  .chrome .num{color:var(--fg);font-weight:500}
+
+  /* progress */
+  #progress{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:6px;pointer-events:auto}
+  #progress .p{width:22px;height:2px;background:rgba(255,255,255,.14);cursor:pointer;transition:all .35s cubic-bezier(.2,.8,.2,1)}
+  #progress .p:hover{background:rgba(255,255,255,.32)}
+  #progress .p.on{background:var(--amber);width:36px;box-shadow:0 0 14px rgba(0,255,206,.55)}
+
+  /* hint */
+  .hint{position:fixed;bottom:62px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;color:var(--fg-mute);letter-spacing:.22em;text-transform:uppercase;z-index:4;pointer-events:none}
+  kbd{display:inline-block;padding:1px 5px;border:1px solid var(--line-strong);border-radius:2px;font-family:var(--mono);font-size:9px;margin:0 1px;color:var(--fg-dim)}
+
+  /* slide layout */
+  #slides{position:fixed;inset:0;z-index:2;pointer-events:none}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:11vh 9vw;opacity:0}
+  .slide.in{opacity:1}
+
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);margin-bottom:30px;display:flex;align-items:center;gap:14px;font-weight:400}
+  .eyebrow::before{content:"";width:38px;height:1px;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+
+  .title{font-family:var(--display);font-weight:400;font-size:clamp(44px,8.2vw,136px);line-height:.94;letter-spacing:-.018em;max-width:22ch;margin-bottom:38px;color:var(--fg)}
+  .title i{font-style:italic;color:var(--amber);font-weight:400;text-shadow:0 0 40px rgba(0,255,206,.25)}
+  .title .word{display:inline-block;white-space:nowrap}
+  .title .ch{display:inline-block;will-change:transform,opacity,filter}
+
+  .lede{font-size:clamp(15px,1.1vw,19px);line-height:1.58;color:#ffffff;max-width:56ch;font-weight:300;letter-spacing:.002em}
+  .lede strong{color:#ffffff;font-weight:600}
+
+  .columns{display:grid;grid-template-columns:repeat(3,1fr);gap:44px;max-width:1120px;margin-top:44px}
+  .col{border-top:1px solid var(--line-strong);padding-top:22px;position:relative}
+  .col::before{content:"";position:absolute;top:-1px;left:0;width:36px;height:1px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .col .num{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:.22em;text-transform:uppercase;margin-bottom:12px}
+  .col h3{font-family:var(--display);font-size:32px;font-weight:400;margin-bottom:10px;letter-spacing:-.01em}
+  .col p{font-size:13.5px;line-height:1.58;color:var(--fg-dim);font-weight:300;max-width:30ch}
+
+  .flow{display:flex;align-items:stretch;gap:18px;margin-top:36px;max-width:1060px}
+  .flow .step{flex:1;border:1px solid var(--line-strong);padding:24px 22px 26px;background:linear-gradient(180deg,rgba(14,20,32,.55),rgba(8,12,20,.35));backdrop-filter:blur(8px);position:relative;overflow:hidden}
+  .flow .step::before{content:"";position:absolute;top:0;left:0;width:44px;height:1px;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+  .flow .step .label{font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:.22em;text-transform:uppercase;margin-bottom:14px;display:block}
+  .flow .step h4{font-family:var(--display);font-size:28px;font-weight:400;margin-bottom:10px;letter-spacing:-.01em}
+  .flow .step p{font-size:12.5px;color:var(--fg-dim);line-height:1.56;font-weight:300}
+  .flow .step p em{color:var(--amber-hi);font-style:italic}
+  .flow .arrow{align-self:center;color:var(--amber);font-family:var(--mono);font-size:20px;text-shadow:0 0 14px var(--amber);padding:0 4px}
+
+  .meta-grid{display:grid;grid-template-columns:auto 1fr;gap:16px 42px;max-width:860px;margin-top:38px;border-top:1px solid var(--line-strong);padding-top:26px}
+  .meta-grid dt{font-family:var(--mono);color:var(--amber);letter-spacing:.2em;text-transform:uppercase;font-size:10px;align-self:start;padding-top:4px;font-weight:500}
+  .meta-grid dd{color:var(--fg-dim);font-size:14px;font-weight:300;letter-spacing:.005em;line-height:1.55;font-family:var(--sans)}
+  .meta-grid dd .mono{font-family:var(--mono);color:var(--cyan);font-size:12.5px;letter-spacing:0}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="vignette"></div>
+<div id="grain"></div>
+
+<div id="ui">
+  <div class="chrome tl"><span class="dot"></span>Frequenz<span class="divider"></span>Assets API Brief</div>
+  <div class="chrome tr"><span id="section-label">§01 · Prologue</span></div>
+  <div class="chrome bl">MMXXVI<span class="divider"></span>Internal Brief</div>
+  <div class="chrome br"><span class="num" id="slide-counter">01 / 14</span></div>
+</div>
+
+<div id="slides"></div>
+<div id="progress"></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd>&nbsp;&nbsp;navigate</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const AMBER = 0x00ffce, AMBER_HI = 0x7dffe3, CYAN = 0x7df9ff, WHITE = 0xf0f2f8;
+const N = 80;
+const MAX_EDGES = 280;
+
+/* ---------------- three setup ---------------- */
+const canvas = document.getElementById('bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x05070d, 1);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x05070d, 0.028);
+
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.set(0, 0, 18);
+const camTarget = new THREE.Vector3(0, 0, 0);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.95, 0.85, 0.2);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* nodes (instanced) */
+const nodeGeom = new THREE.SphereGeometry(0.072, 14, 14);
+const nodeMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+const nodes = new THREE.InstancedMesh(nodeGeom, nodeMat, N);
+nodes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(nodes);
+
+const curr = [], targ = [], currColor = [], targColor = [];
+for (let i = 0; i < N; i++) {
+  curr.push(new THREE.Vector3());
+  targ.push(new THREE.Vector3());
+  currColor.push(new THREE.Color(AMBER));
+  targColor.push(new THREE.Color(AMBER));
+}
+for (let i = 0; i < N; i++) nodes.setColorAt(i, currColor[i]);
+
+/* edges */
+const edgeGeom = new THREE.BufferGeometry();
+const edgePos = new Float32Array(MAX_EDGES * 2 * 3);
+edgeGeom.setAttribute('position', new THREE.BufferAttribute(edgePos, 3).setUsage(THREE.DynamicDrawUsage));
+const edgeMat = new THREE.LineBasicMaterial({
+  color: CYAN, transparent: true, opacity: 0,
+  blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false
+});
+const edgeLines = new THREE.LineSegments(edgeGeom, edgeMat);
+scene.add(edgeLines);
+let edgeList = [];
+
+/* particle field */
+const P = 1400;
+const pGeom = new THREE.BufferGeometry();
+const pPos = new Float32Array(P * 3);
+for (let i = 0; i < P; i++) {
+  pPos[i*3+0] = (Math.random() - 0.5) * 62;
+  pPos[i*3+1] = (Math.random() - 0.5) * 38;
+  pPos[i*3+2] = (Math.random() - 0.5) * 52 - 12;
+}
+pGeom.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({
+  color: 0xffffff, size: 0.02, transparent: true, opacity: 0.5,
+  sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
+});
+const particles = new THREE.Points(pGeom, pMat);
+scene.add(particles);
+
+/* ---------------- formations ---------------- */
+function fSphere(n, r) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const rad = Math.sqrt(1 - y*y);
+    const theta = i * 2.39996;
+    out.push(new THREE.Vector3(Math.cos(theta)*rad*r, y*r, Math.sin(theta)*rad*r));
+  }
+  return out;
+}
+function fClusters(n, centers, spread = 2.4) {
+  const out = [];
+  const per = Math.floor(n / centers.length);
+  for (let c = 0; c < centers.length; c++) {
+    const count = (c === centers.length - 1) ? n - per * c : per;
+    for (let i = 0; i < count; i++) {
+      out.push(new THREE.Vector3(
+        centers[c].x + (Math.random() - 0.5) * spread,
+        centers[c].y + (Math.random() - 0.5) * spread,
+        centers[c].z + (Math.random() - 0.5) * spread
+      ));
+    }
+  }
+  return out;
+}
+function fRing(n, r) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    out.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(i * 0.9) * 0.22, Math.sin(a) * r));
+  }
+  return out;
+}
+function fGrid(n, cols, spacing) {
+  const out = [];
+  const rows = Math.ceil(n / cols);
+  for (let i = 0; i < n; i++) {
+    const c = i % cols, r = Math.floor(i / cols);
+    out.push(new THREE.Vector3(
+      (c - cols/2 + 0.5) * spacing,
+      (r - rows/2 + 0.5) * spacing * 0.85,
+      0
+    ));
+  }
+  return out;
+}
+function fHub(n, r) {
+  const out = [new THREE.Vector3(0, 0, 0)];
+  for (let i = 1; i < n; i++) {
+    const phi = Math.random() * Math.PI * 2;
+    const costheta = Math.random() * 2 - 1;
+    const theta = Math.acos(costheta);
+    const rr = 0.6 + Math.random() * r;
+    out.push(new THREE.Vector3(
+      rr * Math.sin(theta) * Math.cos(phi),
+      rr * Math.sin(theta) * Math.sin(phi),
+      rr * Math.cos(theta)
+    ));
+  }
+  return out;
+}
+function fLayers(n, ys, width = 13, depth = 5) {
+  const out = [];
+  const per = Math.floor(n / ys.length);
+  for (let l = 0; l < ys.length; l++) {
+    const count = (l === ys.length - 1) ? n - per * l : per;
+    for (let i = 0; i < count; i++) {
+      out.push(new THREE.Vector3(
+        (Math.random() - 0.5) * width,
+        ys[l] + (Math.random() - 0.5) * 0.4,
+        (Math.random() - 0.5) * depth
+      ));
+    }
+  }
+  return out;
+}
+function fBurst(n, r) {
+  const out = [new THREE.Vector3(0, 0, 0)];
+  for (let i = 1; i < n; i++) {
+    const v = new THREE.Vector3(
+      Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5
+    ).normalize();
+    out.push(v.multiplyScalar(1.2 + Math.random() * r));
+  }
+  return out;
+}
+function fConcentric() {
+  // 8 + 16 + 24 + 32 = 80
+  const rings = [
+    { count: 8,  r: 1.3, y:  1.4 },
+    { count: 16, r: 2.8, y:  0.5 },
+    { count: 24, r: 4.2, y: -0.4 },
+    { count: 32, r: 5.6, y: -1.3 },
+  ];
+  const out = [];
+  for (let r = 0; r < rings.length; r++) {
+    const { count, r: radius, y } = rings[r];
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + r * 0.22;
+      out.push(new THREE.Vector3(Math.cos(a) * radius, y, Math.sin(a) * radius));
+    }
+  }
+  return out;
+}
+function fSpiral(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const a = t * Math.PI * 7;
+    const r = 1.2 + t * 5.2;
+    out.push(new THREE.Vector3(Math.cos(a) * r, (t - 0.5) * 5, Math.sin(a) * r));
+  }
+  return out;
+}
+function fDome(n, r) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const y = Math.pow(Math.random(), 0.7);
+    const rad = Math.sqrt(1 - y*y);
+    const theta = Math.random() * Math.PI * 2;
+    out.push(new THREE.Vector3(Math.cos(theta)*rad*r, y*r - r*0.35, Math.sin(theta)*rad*r));
+  }
+  return out;
+}
+
+/* ---------------- edges ---------------- */
+function edgesNearest(pts, k) {
+  const edges = [];
+  const seen = new Set();
+  for (let i = 0; i < pts.length; i++) {
+    const ds = [];
+    for (let j = 0; j < pts.length; j++) {
+      if (j === i) continue;
+      ds.push({ j, d: pts[i].distanceToSquared(pts[j]) });
+    }
+    ds.sort((a, b) => a.d - b.d);
+    for (let m = 0; m < k && m < ds.length; m++) {
+      const j = ds[m].j;
+      const key = i < j ? i + '-' + j : j + '-' + i;
+      if (!seen.has(key)) { seen.add(key); edges.push([i, j]); }
+      if (edges.length >= MAX_EDGES) return edges;
+    }
+  }
+  return edges;
+}
+function edgesHub(n, hub, max) {
+  const edges = [];
+  for (let i = 0; i < n; i++) {
+    if (i === hub) continue;
+    edges.push([hub, i]);
+    if (edges.length >= max) break;
+  }
+  return edges;
+}
+function edgesRingSequence(n) {
+  const e = [];
+  for (let i = 0; i < n; i++) e.push([i, (i + 1) % n]);
+  return e;
+}
+function edgesLayerChains(n, layerCount) {
+  const per = Math.floor(n / layerCount);
+  const e = [];
+  for (let l = 0; l < layerCount - 1; l++) {
+    for (let i = 0; i < per; i++) {
+      const a = l * per + i;
+      const b = (l + 1) * per + i;
+      if (a < n && b < n) e.push([a, b]);
+      if (e.length >= MAX_EDGES) return e;
+    }
+  }
+  return e;
+}
+function edgesConcentric() {
+  const e = [];
+  const counts = [8, 16, 24, 32];
+  const offs = [0, 8, 24, 48];
+  for (let r = 0; r < counts.length; r++) {
+    for (let i = 0; i < counts[r]; i++) {
+      e.push([offs[r] + i, offs[r] + (i + 1) % counts[r]]);
+    }
+  }
+  for (let r = 0; r < counts.length - 1; r++) {
+    const step = counts[r+1] / counts[r];
+    for (let i = 0; i < counts[r]; i++) {
+      e.push([offs[r] + i, offs[r+1] + Math.floor(i * step)]);
+      if (e.length >= MAX_EDGES) return e;
+    }
+  }
+  return e;
+}
+
+/* ---------------- slide definitions ---------------- */
+const slideDefs = [
+  {
+    section: '§01 · Prologue',
+    eyebrow: '§01 — Prologue',
+    title: 'Assets <i>API</i>',
+    lede: 'A read-only window onto the Frequenz Platform. <strong>Microgrids, gridpools, components</strong> — and the graph that binds them into a working system.',
+    scene: () => ({
+      nodes: fSphere(N, 6.4),
+      edges: [],
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 0, 15], look: [0, 0, 0] },
+      bloom: 1.55
+    })
+  },
+  {
+    section: '§02 · Background',
+    eyebrow: '§02 — Background',
+    title: 'Defined in the app.<br>Served by the <i>API</i>.',
+    lede: 'Assets are created and managed centrally in the Frequenz App. The API exposes that truth — it does not create, it does not mutate. <strong>Read. Traverse. Reason.</strong>',
+    scene: () => {
+      const pos = fClusters(N, [
+        new THREE.Vector3(-5.6, 0.5, 0),
+        new THREE.Vector3(0, -0.8, -2),
+        new THREE.Vector3(5.6, 0.3, 0)
+      ], 2.1);
+      const cs = [];
+      const per = Math.floor(N / 3);
+      for (let c = 0; c < 3; c++) {
+        const count = (c === 2) ? N - per * 2 : per;
+        const color = [AMBER, WHITE, CYAN][c];
+        for (let i = 0; i < count; i++) cs.push(color);
+      }
+      return {
+        nodes: pos, edges: [],
+        colors: cs,
+        camera: { pos: [0, 0, 16], look: [0, 0, 0] },
+        bloom: 1.2
+      };
+    }
+  },
+  {
+    section: '§03 · Purpose',
+    eyebrow: '§03 — Purpose',
+    title: 'A structural access layer<br>over the <i>asset graph</i>.',
+    lede: 'Not just retrieval. Context-rich relationships that let applications reason about topology in real time — microgrids, gridpools, components, and every interconnection between them.',
+    scene: () => {
+      const pos = fSphere(N, 4.6);
+      return {
+        nodes: pos,
+        edges: edgesNearest(pos, 3),
+        colors: Array(N).fill(CYAN),
+        camera: { pos: [1, 2, 12], look: [0, 0, 0] },
+        bloom: 1.25
+      };
+    }
+  },
+  {
+    section: '§04 · Why it matters',
+    eyebrow: '§04 — Why it matters',
+    title: 'From data provider<br>to <i>orchestration platform</i>.',
+    lede: 'Without a shared topology layer, every service rebuilds the asset model for itself. Models drift. Views diverge. <strong>It does not scale.</strong>',
+    scene: () => {
+      const pos = fHub(N, 5.4);
+      const cs = Array(N).fill(CYAN);
+      cs[0] = AMBER_HI;
+      return {
+        nodes: pos,
+        edges: edgesHub(N, 0, 65),
+        colors: cs,
+        camera: { pos: [0, 0, 13], look: [0, 0, 0] },
+        bloom: 1.55
+      };
+    }
+  },
+  {
+    section: '§04.1 · Single source of truth',
+    eyebrow: '§04.1 — Single source of truth',
+    title: 'One representation.<br>Every service.',
+    lede: 'No duplicate models. No diverging interpretations. No inconsistent views of the same grid. <strong>One graph. One truth.</strong>',
+    scene: () => {
+      const pos = fSphere(N, 3.1);
+      return {
+        nodes: pos,
+        edges: edgesNearest(pos, 2),
+        colors: Array(N).fill(AMBER),
+        camera: { pos: [0, 0, 9], look: [0, 0, 0] },
+        bloom: 1.85
+      };
+    }
+  },
+  {
+    section: '§04.2 · Decoupled evolution',
+    eyebrow: '§04.2 — Decoupled evolution',
+    title: 'UI owns lifecycle.<br>API owns the <i>contract</i>.',
+    lede: 'Downstream services depend on a stable interface — not on how assets are created upstream. Both sides evolve on their own clock.',
+    scene: () => {
+      const pos = fLayers(N, [2.6, -2.6], 13, 5);
+      const cs = [];
+      for (let i = 0; i < N; i++) cs.push(i < N/2 ? AMBER : CYAN);
+      return {
+        nodes: pos,
+        edges: [],
+        colors: cs,
+        camera: { pos: [0, 0, 13], look: [0, 0, 0] },
+        bloom: 1.25
+      };
+    }
+  },
+  {
+    section: '§04.3 · Orchestration',
+    eyebrow: '§04.3 — Enabling orchestration',
+    title: 'Topology,<br>not just <i>metrics</i>.',
+    lede: 'Component-graph visualization. Gridpool optimization. Market-aware trading. Every one of them needs structure — not just measurements.',
+    scene: () => {
+      const pos = fGrid(N, 10, 1.25);
+      return {
+        nodes: pos,
+        edges: edgesNearest(pos, 2),
+        colors: Array(N).fill(CYAN),
+        camera: { pos: [0, 2.6, 11], look: [0, 0, 0] },
+        bloom: 1.3
+      };
+    }
+  },
+  {
+    section: '§05 · Current status',
+    eyebrow: '§05 — Current status',
+    title: 'Three lenses<br>on a <i>microgrid</i>.',
+    extraHTML: `
+      <div class="columns">
+        <div class="col">
+          <div class="num">01 / Overview</div>
+          <h3>Identity</h3>
+          <p>Location, delivery area, and the context a microgrid lives in.</p>
+        </div>
+        <div class="col">
+          <div class="num">02 / Components</div>
+          <h3>Inventory</h3>
+          <p>Batteries, inverters, chargers. Fetch all — or filter by type.</p>
+        </div>
+        <div class="col">
+          <div class="num">03 / Connectivity</div>
+          <h3>Topology</h3>
+          <p>How the components are actually wired. The shape of the system.</p>
+        </div>
+      </div>
+    `,
+    scene: () => {
+      const pos = fRing(N, 4.2);
+      return {
+        nodes: pos,
+        edges: edgesRingSequence(N),
+        colors: Array(N).fill(AMBER),
+        camera: { pos: [0, 4, 10], look: [0, 0, 0] },
+        bloom: 1.4
+      };
+    }
+  },
+  {
+    section: '§06 · Live example',
+    eyebrow: '§06 — Live example',
+    title: 'Trading &nbsp;→&nbsp; Assets &nbsp;→&nbsp; <i>Dispatch</i>',
+    extraHTML: `
+      <div class="flow">
+        <div class="step"><span class="label">01 / Trading</span><h4>Intent</h4><p>Defines what should happen. Orders, schedules, commitments.</p></div>
+        <div class="arrow">→</div>
+        <div class="step"><span class="label">02 / Assets</span><h4>Mapping</h4><p>Resolves scope, components, connectivity. <em>Where</em> — and with what.</p></div>
+        <div class="arrow">→</div>
+        <div class="step"><span class="label">03 / Dispatch</span><h4>Execution</h4><p>Sends the commands to the actual hardware.</p></div>
+      </div>
+    `,
+    scene: () => {
+      const pos = fLayers(N, [3, 0, -3], 12, 4);
+      return {
+        nodes: pos,
+        edges: edgesLayerChains(N, 3),
+        colors: (() => {
+          const cs = []; const per = Math.floor(N / 3);
+          for (let i = 0; i < N; i++) {
+            if (i < per) cs.push(AMBER);
+            else if (i < per*2) cs.push(WHITE);
+            else cs.push(CYAN);
+          }
+          return cs;
+        })(),
+        camera: { pos: [0, 0, 13], look: [0, 0, 0] },
+        bloom: 1.4
+      };
+    }
+  },
+  {
+    section: '§07 · Future work',
+    eyebrow: '§07 — Future work',
+    title: 'Expanding<br>the <i>graph</i>.',
+    extraHTML: `
+      <dl class="meta-grid">
+        <dt>Scope</dt><dd>Enterprises · Gridpools · Assigned microgrids · Schedules · Balancing accounts</dd>
+        <dt>Integrations</dt><dd>Notebooks · Trading applications · Component-graph visualizations</dd>
+      </dl>
+    `,
+    scene: () => {
+      const pos = fBurst(N, 6.8);
+      const cs = Array(N).fill(AMBER);
+      cs[0] = WHITE;
+      return {
+        nodes: pos,
+        edges: edgesHub(N, 0, 55),
+        colors: cs,
+        camera: { pos: [0, 0, 14], look: [0, 0, 0] },
+        bloom: 1.55
+      };
+    }
+  },
+  {
+    section: '§08 · Architecture',
+    eyebrow: '§08 — Architecture & Access',
+    title: 'Service. Client. <i>Schema</i>.',
+    extraHTML: `
+      <dl class="meta-grid">
+        <dt>Service API</dt><dd>Closed source · platform-gated · the source of truth</dd>
+        <dt>Client SDK</dt><dd>Open · Python · <span class="mono">frequenz-client-assets-python</span></dd>
+        <dt>gRPC Schema</dt><dd>Open · <span class="mono">frequenz-api-assets</span> · bring your own backend</dd>
+        <dt>Docs</dt><dd>Public reference — structure, usage, definitions</dd>
+      </dl>
+    `,
+    scene: () => {
+      const pos = fConcentric();
+      return {
+        nodes: pos,
+        edges: edgesConcentric(),
+        colors: Array(N).fill(CYAN),
+        camera: { pos: [0, 6.5, 9], look: [0, 0, 0] },
+        bloom: 1.2
+      };
+    }
+  },
+  {
+    section: '§09 · Scope & Limits',
+    eyebrow: '§09 — Scope & Limitations',
+    title: 'Read-only,<br><i>by design</i>.',
+    lede: 'Detailed asset data for analytics and decision systems. No CRUD. Quality and timeliness track the platform underneath — <strong>garbage in, garbage out</strong>.',
+    scene: () => ({
+      nodes: fDome(N, 5),
+      edges: [],
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 1, 12], look: [0, 0, 0] },
+      bloom: 1.35
+    })
+  },
+  {
+    section: '§10 · Audience',
+    eyebrow: '§10 — Target audience',
+    title: 'Built for the developers<br><i>orchestrating the grid</i>.',
+    lede: 'Cloud application developers building microgrid orchestration, gridpool trading, and intelligent software on top of Frequenz platform data.',
+    scene: () => ({
+      nodes: fSpiral(N),
+      edges: (() => { const e = []; for (let i = 0; i < N - 1; i++) e.push([i, i + 1]); return e; })(),
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 0, 15], look: [0, 0, 0] },
+      bloom: 1.6
+    })
+  }
+];
+
+/* ---------------- slide application ---------------- */
+let currentIdx = -1;
+
+function applyScene(def) {
+  const s = def.scene();
+  for (let i = 0; i < N; i++) {
+    targ[i].copy(s.nodes[i] || new THREE.Vector3());
+    targColor[i].copy(new THREE.Color(s.colors[i] || AMBER));
+  }
+  for (let i = 0; i < N; i++) {
+    gsap.to(curr[i], {
+      x: targ[i].x, y: targ[i].y, z: targ[i].z,
+      duration: 1.7, ease: 'power3.inOut',
+      delay: (i / N) * 0.35
+    });
+    gsap.to(currColor[i], {
+      r: targColor[i].r, g: targColor[i].g, b: targColor[i].b,
+      duration: 1.2, ease: 'power2.inOut', delay: 0.2
+    });
+  }
+  gsap.to(camera.position, {
+    x: s.camera.pos[0], y: s.camera.pos[1], z: s.camera.pos[2],
+    duration: 1.9, ease: 'power3.inOut'
+  });
+  gsap.to(camTarget, {
+    x: s.camera.look[0], y: s.camera.look[1], z: s.camera.look[2],
+    duration: 1.9, ease: 'power3.inOut'
+  });
+  edgeList = s.edges || [];
+  gsap.fromTo(edgeMat,
+    { opacity: 0 },
+    { opacity: edgeList.length ? 0.32 : 0, duration: 1.0, ease: 'power2.out', delay: 0.35 }
+  );
+  gsap.to(bloom, { strength: s.bloom * 0.7, duration: 1.6, ease: 'power2.inOut' });
+}
+
+/* ---------------- text rendering ---------------- */
+function splitChars(el) {
+  const walk = (node) => {
+    if (node.nodeType === 3) {
+      const text = node.textContent;
+      const frag = document.createDocumentFragment();
+      const parts = text.split(/(\s+)/);
+      for (const part of parts) {
+        if (part === '') continue;
+        if (/^\s+$/.test(part)) {
+          frag.appendChild(document.createTextNode(part));
+        } else {
+          const word = document.createElement('span');
+          word.className = 'word';
+          for (const ch of part) {
+            const s = document.createElement('span');
+            s.className = 'ch';
+            s.textContent = ch;
+            word.appendChild(s);
+          }
+          frag.appendChild(word);
+        }
+      }
+      node.replaceWith(frag);
+    } else if (node.nodeType === 1 && node.tagName !== 'BR') {
+      Array.from(node.childNodes).forEach(walk);
+    }
+  };
+  Array.from(el.childNodes).forEach(walk);
+}
+
+function renderText(i, isInitial) {
+  const container = document.getElementById('slides');
+  const def = slideDefs[i];
+
+  container.querySelectorAll('.slide').forEach(prev => {
+    gsap.killTweensOf(prev);
+    const prevChars = prev.querySelectorAll('.ch');
+    gsap.killTweensOf(prevChars);
+    gsap.killTweensOf(prev.querySelectorAll('.eyebrow, .lede, .col, .flow .step, .flow .arrow, .meta-grid dt, .meta-grid dd'));
+    gsap.to(prevChars, {
+      y: -26, opacity: 0, filter: 'blur(8px)',
+      duration: 0.4, ease: 'power2.in', stagger: 0.004, overwrite: true
+    });
+    gsap.to(prev, {
+      opacity: 0, y: -20, duration: 0.45, ease: 'power2.in', overwrite: true,
+      onComplete: () => prev.remove()
+    });
+  });
+
+  const el = document.createElement('div');
+  el.className = 'slide';
+  el.innerHTML = `
+    <div class="eyebrow">${def.eyebrow}</div>
+    <h1 class="title">${def.title}</h1>
+    ${def.lede ? `<p class="lede">${def.lede}</p>` : ''}
+    ${def.extraHTML || ''}
+  `;
+  container.appendChild(el);
+
+  const titleEl = el.querySelector('.title');
+  splitChars(titleEl);
+  const chars = titleEl.querySelectorAll('.ch');
+  const eyebrow = el.querySelector('.eyebrow');
+  const lede = el.querySelector('.lede');
+  const extras = el.querySelectorAll('.col, .flow .step, .flow .arrow, .meta-grid dt, .meta-grid dd');
+
+  const base = isInitial ? 0.35 : 0.72;
+  gsap.set(el, { opacity: 1 });
+  el.classList.add('in');
+
+  gsap.set(eyebrow, { opacity: 0, x: -14 });
+  gsap.to(eyebrow, { opacity: 1, x: 0, duration: 0.7, ease: 'power2.out', delay: base });
+
+  gsap.set(chars, { y: 84, opacity: 0, filter: 'blur(14px)' });
+  gsap.to(chars, {
+    y: 0, opacity: 1, filter: 'blur(0px)',
+    duration: 1.15, ease: 'power3.out',
+    stagger: 0.018, delay: base + 0.1
+  });
+
+  if (lede) {
+    gsap.set(lede, { y: 24, opacity: 0 });
+    gsap.to(lede, { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out', delay: base + 0.55 });
+  }
+  if (extras.length) {
+    gsap.set(extras, { y: 24, opacity: 0 });
+    gsap.to(extras, {
+      y: 0, opacity: 1, duration: 0.85, ease: 'power2.out',
+      stagger: 0.055, delay: base + 0.68
+    });
+  }
+}
+
+/* ---------------- navigation ---------------- */
+function go(i) {
+  if (i < 0 || i >= slideDefs.length || i === currentIdx) return;
+  const isInitial = currentIdx === -1;
+  currentIdx = i;
+  const def = slideDefs[i];
+  applyScene(def);
+  renderText(i, isInitial);
+  document.getElementById('slide-counter').textContent =
+    String(i + 1).padStart(2, '0') + ' / ' + String(slideDefs.length).padStart(2, '0');
+  document.getElementById('section-label').textContent = def.section;
+  [...document.querySelectorAll('#progress .p')].forEach((p, j) => p.classList.toggle('on', j === i));
+}
+
+const prog = document.getElementById('progress');
+slideDefs.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'p';
+  d.addEventListener('click', (e) => { e.stopPropagation(); go(i); });
+  prog.appendChild(d);
+});
+
+window.addEventListener('keydown', (e) => {
+  if (['ArrowRight', ' ', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); go(currentIdx + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(currentIdx - 1); }
+  else if (e.key === 'Home') { go(0); }
+  else if (e.key === 'End') { go(slideDefs.length - 1); }
+});
+
+let ts = 0;
+window.addEventListener('touchstart', e => ts = e.touches[0].clientX, { passive: true });
+window.addEventListener('touchend', e => {
+  const d = e.changedTouches[0].clientX - ts;
+  if (d < -50) go(currentIdx + 1);
+  else if (d > 50) go(currentIdx - 1);
+}, { passive: true });
+
+window.addEventListener('click', (e) => {
+  if (e.target.closest('#progress')) return;
+  go(currentIdx + 1);
+});
+
+function resize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  bloom.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', resize);
+
+/* ---------------- animation loop ---------------- */
+const dummy = new THREE.Object3D();
+const clock = new THREE.Clock();
+const driftPhase = Math.random() * 10;
+
+function animate() {
+  const t = clock.getElapsedTime();
+
+  for (let i = 0; i < N; i++) {
+    dummy.position.set(
+      curr[i].x + Math.sin(t * 0.5 + i * 0.35) * 0.04,
+      curr[i].y + Math.cos(t * 0.4 + i * 0.7) * 0.04,
+      curr[i].z + Math.sin(t * 0.3 + i * 1.1) * 0.04
+    );
+    const s = 0.85 + Math.sin(t * 1.8 + i * 0.6) * 0.22;
+    dummy.scale.setScalar(s);
+    dummy.updateMatrix();
+    nodes.setMatrixAt(i, dummy.matrix);
+    nodes.setColorAt(i, currColor[i]);
+  }
+  nodes.instanceMatrix.needsUpdate = true;
+  if (nodes.instanceColor) nodes.instanceColor.needsUpdate = true;
+
+  if (edgeList.length > 0) {
+    for (let e = 0; e < edgeList.length; e++) {
+      const [a, b] = edgeList[e];
+      edgePos[e*6+0] = curr[a].x; edgePos[e*6+1] = curr[a].y; edgePos[e*6+2] = curr[a].z;
+      edgePos[e*6+3] = curr[b].x; edgePos[e*6+4] = curr[b].y; edgePos[e*6+5] = curr[b].z;
+    }
+    edgeGeom.attributes.position.needsUpdate = true;
+    edgeGeom.setDrawRange(0, edgeList.length * 2);
+  } else {
+    edgeGeom.setDrawRange(0, 0);
+  }
+
+  particles.rotation.y = t * 0.008;
+  particles.rotation.x = Math.sin(t * 0.05) * 0.05;
+
+  const dx = Math.sin(t * 0.18 + driftPhase) * 0.06;
+  const dy = Math.cos(t * 0.15 + driftPhase) * 0.05;
+  camera.lookAt(camTarget.x + dx, camTarget.y + dy, camTarget.z);
+
+  composer.render();
+  requestAnimationFrame(animate);
+}
+
+/* seed nodes at origin so they burst out into slide 1's sphere */
+for (let i = 0; i < N; i++) {
+  curr[i].set(
+    (Math.random() - 0.5) * 0.5,
+    (Math.random() - 0.5) * 0.5,
+    (Math.random() - 0.5) * 0.5
+  );
+}
+animate();
+setTimeout(() => go(0), 180);
+</script>
+</body>
+</html>
