@@ -549,17 +549,17 @@ const slideDefs = [
         <div class="col">
           <div class="num">01 /</div>
           <h3>UI manages</h3>
-          <p>Asset lifecycle — creation, editing, deletion — owned entirely by the UI.</p>
+          <p>Asset lifecycle — creation, editing, deletion — is owned entirely by the UI, not the Assets API.</p>
         </div>
         <div class="col">
           <div class="num">02 /</div>
-          <h3>Services consume</h3>
-          <p>Other services read from a stable interface, with no knowledge of how assets are managed.</p>
+          <h3>Assets API serves</h3>
+          <p>The Assets API exposes a stable, read-only view that any service can consume without knowing how assets are managed.</p>
         </div>
         <div class="col">
           <div class="num">03 /</div>
-          <h3>Independent clocks</h3>
-          <p>Both sides evolve on their own schedule without breaking each other.</p>
+          <h3>Decoupling</h3>
+          <p>Because writes and reads are separated, the UI and services can evolve independently — changes on one side don't break the other.</p>
         </div>
       </div>
     `,
