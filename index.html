@@ -398,8 +398,39 @@ const slideDefs = [
     })
   },
   {
-    section: '§01 · What is the Assets API?',
-    eyebrow: '§01 — What is the Assets API?',
+    section: '§01 · Overview',
+    eyebrow: '§01 — Overview',
+    title: 'The platform\'s<br><i>asset layer</i>.',
+    extraHTML: `
+      <div class="columns">
+        <div class="col">
+          <div class="num">01 / What</div>
+          <h3>The assets</h3>
+          <p>Microgrids, gridpools, batteries, inverters, chargers — the physical hardware the Frequenz platform manages.</p>
+        </div>
+        <div class="col">
+          <div class="num">02 / How</div>
+          <h3>One API</h3>
+          <p>A single, consistent interface to query everything that exists in the system. Read-only and always up to date.</p>
+        </div>
+        <div class="col">
+          <div class="num">03 / Who</div>
+          <h3>Every service</h3>
+          <p>Trading, dispatch, monitoring — any service that needs to know what's in the system reads from the same source.</p>
+        </div>
+      </div>
+    `,
+    scene: () => ({
+      nodes: fSphere(N, 5.2),
+      edges: edgesNearest(fSphere(N, 5.2), 2),
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 0, 14], look: [0, 0, 0] },
+      bloom: 1.4
+    })
+  },
+  {
+    section: '§02 · What is the Assets API?',
+    eyebrow: '§02 — What is the Assets API?',
     title: 'Read-only.<br><i>Structured.</i> Shared.',
     extraHTML: `
       <div class="columns">
@@ -429,8 +460,8 @@ const slideDefs = [
     })
   },
   {
-    section: '§02 · What the API provides',
-    eyebrow: '§02 — What the API provides',
+    section: '§03 · What the API provides',
+    eyebrow: '§03 — What the API provides',
     title: 'Three lenses<br>on a <i>microgrid</i>.',
     extraHTML: `
       <div class="columns">
@@ -463,8 +494,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§03 · The Problem',
-    eyebrow: '§03 — The Problem',
+    section: '§04 · The Problem',
+    eyebrow: '§04 — The Problem',
     title: 'A shared view<br>of what <i>exists</i>.',
     extraHTML: `
       <div class="columns">
@@ -494,8 +525,8 @@ const slideDefs = [
     })
   },
   {
-    section: '§04.1 · Single source of truth',
-    eyebrow: '§04.1 — Single source of truth',
+    section: '§05.1 · Single source of truth',
+    eyebrow: '§05.1 — Single source of truth',
     title: 'One representation.<br>Every <i>service</i>.',
     extraHTML: `
       <div class="columns">
@@ -528,8 +559,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§04.2 · Decoupling',
-    eyebrow: '§04.2 — Decoupling',
+    section: '§05.2 · Decoupling',
+    eyebrow: '§05.2 — Decoupling',
     title: 'UI manages.<br>Services <i>consume</i>.',
     extraHTML: `
       <div class="columns">
@@ -564,8 +595,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§04.3 · Enables orchestration',
-    eyebrow: '§04.3 — Enables orchestration',
+    section: '§05.3 · Enables orchestration',
+    eyebrow: '§05.3 — Enables orchestration',
     title: 'Not just data.<br><i>Coordinated decisions.</i>',
     extraHTML: `
       <div class="columns">
@@ -598,8 +629,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§05 · From decision to hardware',
-    eyebrow: '§05 — From decision to hardware',
+    section: '§06 · From decision to hardware',
+    eyebrow: '§06 — From decision to hardware',
     title: 'Trading &nbsp;→&nbsp; Assets &nbsp;→&nbsp; <i>Dispatch</i>',
     extraHTML: `
       <div class="flow">
@@ -630,8 +661,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§06 · Current scope',
-    eyebrow: '§06 — Current scope',
+    section: '§07 · Current scope',
+    eyebrow: '§07 — Current scope',
     title: 'A <i>foundation</i> layer.',
     extraHTML: `
       <div class="columns">
@@ -661,8 +692,8 @@ const slideDefs = [
     })
   },
   {
-    section: '§07 · What\'s next',
-    eyebrow: '§07 — What\'s next',
+    section: '§08 · What\'s next',
+    eyebrow: '§08 — What\'s next',
     title: 'Beyond <i>microgrids</i>.',
     extraHTML: `
       <div class="columns">
@@ -697,8 +728,8 @@ const slideDefs = [
     }
   },
   {
-    section: '§08 · Takeaway',
-    eyebrow: '§08 — Takeaway',
+    section: '§09 · Takeaway',
+    eyebrow: '§09 — Takeaway',
     title: 'Shared understanding.<br>Real <i>orchestration</i>.',
     extraHTML: `
       <div class="columns">
@@ -728,8 +759,8 @@ const slideDefs = [
     })
   },
   {
-    section: '§09 · Thank you',
-    eyebrow: '§09 — Thank you',
+    section: '§10 · Thank you',
+    eyebrow: '§10 — Thank you',
     title: 'Thank <i>you</i>',
     extraClass: 'centered',
     scene: () => ({
