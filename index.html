@@ -390,11 +390,11 @@ const slideDefs = [
     title: 'Assets <i>API</i>',
     extraClass: 'centered',
     scene: () => ({
-      nodes: Array.from({ length: N }, () => new THREE.Vector3((Math.random()-0.5)*0.3, (Math.random()-0.5)*0.3, 0)),
+      nodes: fSphere(N, 6.4),
       edges: [],
-      colors: Array(N).fill(0x05070d),
+      colors: Array(N).fill(AMBER),
       camera: { pos: [0, 0, 15], look: [0, 0, 0] },
-      bloom: 0.01
+      bloom: 1.55
     })
   },
   {
@@ -499,11 +499,11 @@ const slideDefs = [
       </div>
     `,
     scene: () => ({
-      nodes: fSphere(N, 6.4),
+      nodes: fBurst(N, 6.8),
       edges: [],
       colors: Array(N).fill(AMBER),
       camera: { pos: [0, 0, 15], look: [0, 0, 0] },
-      bloom: 1.55
+      bloom: 1.3
     })
   },
   {
@@ -834,8 +834,7 @@ function applyScene(def) {
     { opacity: 0 },
     { opacity: edgeList.length ? 0.32 : 0, duration: 1.0, ease: 'power2.out', delay: 0.35 }
   );
-  const isIntro = s.bloom < 0.05;
-  gsap.to(nodeMat, { opacity: isIntro ? 0 : 1, duration: isIntro ? 0.2 : 0.8, delay: isIntro ? 0 : 0.3 });
+  gsap.to(nodeMat, { opacity: 1, duration: 0.8, delay: 0.3 });
   gsap.to(bloom, { strength: s.bloom, duration: 0.5, ease: 'power3.out' });
   gsap.to(bloom, { strength: s.bloom * 0.42, duration: 2.4, ease: 'power2.inOut', delay: 0.8 });
 }
