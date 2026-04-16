@@ -494,42 +494,6 @@ const slideDefs = [
     })
   },
   {
-    section: '§04 · Why it matters',
-    eyebrow: '§04 — Why it matters',
-    title: 'From data provider<br>to <i>platform</i>.',
-    extraHTML: `
-      <div class="columns">
-        <div class="col">
-          <div class="num">01 / Reason</div>
-          <h3>Single truth</h3>
-          <p>Everyone sees the same system — no duplicate models or conflicting views.</p>
-        </div>
-        <div class="col">
-          <div class="num">02 / Reason</div>
-          <h3>Decoupling</h3>
-          <p>UI manages assets. Other services consume them. Each evolves independently.</p>
-        </div>
-        <div class="col">
-          <div class="num">03 / Reason</div>
-          <h3>Orchestration</h3>
-          <p>Enables coordinated decisions across systems — not just data access.</p>
-        </div>
-      </div>
-    `,
-    scene: () => {
-      const pos = fHub(N, 5.4);
-      const cs = Array(N).fill(CYAN);
-      cs[0] = AMBER_HI;
-      return {
-        nodes: pos,
-        edges: edgesHub(N, 0, 65),
-        colors: cs,
-        camera: { pos: [0, 0, 13], look: [0, 0, 0] },
-        bloom: 1.55
-      };
-    }
-  },
-  {
     section: '§04.1 · Single source of truth',
     eyebrow: '§04.1 — Single source of truth',
     title: 'One representation.<br>Every <i>service</i>.',
