@@ -401,25 +401,7 @@ const slideDefs = [
     section: '§01 · Overview',
     eyebrow: '§01 — Overview',
     title: 'The platform\'s<br><i>asset layer</i>.',
-    extraHTML: `
-      <div class="columns">
-        <div class="col">
-          <div class="num">01 / What</div>
-          <h3>The assets</h3>
-          <p>Microgrids, batteries, inverters, chargers — the physical hardware the Frequenz platform manages.</p>
-        </div>
-        <div class="col">
-          <div class="num">02 / How</div>
-          <h3>One API</h3>
-          <p>A single, consistent interface to query everything that exists in the system. Read-only and always up to date.</p>
-        </div>
-        <div class="col">
-          <div class="num">03 / Who</div>
-          <h3>Every service</h3>
-          <p>Trading, dispatch, monitoring — any service that needs to know what's in the system reads from the same source.</p>
-        </div>
-      </div>
-    `,
+    lede: 'In a nutshell, the Assets API is the layer that defines everything in the system and makes it accessible to all services through a single interface.',
     scene: () => ({
       nodes: fSphere(N, 5.2),
       edges: edgesNearest(fSphere(N, 5.2), 2),
