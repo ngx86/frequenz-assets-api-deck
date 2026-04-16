@@ -411,39 +411,8 @@ const slideDefs = [
     })
   },
   {
-    section: '§02 · What is the Assets API?',
-    eyebrow: '§02 — What is the Assets API?',
-    title: 'Read-only.<br><i>Structured.</i> Shared.',
-    extraHTML: `
-      <div class="columns">
-        <div class="col">
-          <div class="num">01 / What</div>
-          <h3>Read-only</h3>
-          <p>A read-only interface to everything that exists in the platform.</p>
-        </div>
-        <div class="col">
-          <div class="num">02 / Scope</div>
-          <h3>No writes</h3>
-          <p>It doesn't create or modify anything.</p>
-        </div>
-        <div class="col">
-          <div class="num">03 / Output</div>
-          <h3>Structured view</h3>
-          <p>Exposes assets and their relationships in a consistent, usable form.</p>
-        </div>
-      </div>
-    `,
-    scene: () => ({
-      nodes: fSphere(N, 6.4),
-      edges: [],
-      colors: Array(N).fill(AMBER),
-      camera: { pos: [0, 0, 15], look: [0, 0, 0] },
-      bloom: 1.55
-    })
-  },
-  {
-    section: '§03 · What the API provides',
-    eyebrow: '§03 — What the API provides',
+    section: '§02 · What the API provides',
+    eyebrow: '§02 — What the API provides',
     title: 'Three lenses<br>on a <i>microgrid</i>.',
     extraHTML: `
       <div class="columns">
@@ -474,6 +443,37 @@ const slideDefs = [
         bloom: 1.4
       };
     }
+  },
+  {
+    section: '§03 · What is the Assets API?',
+    eyebrow: '§03 — What is the Assets API?',
+    title: 'Read-only.<br><i>Structured.</i> Shared.',
+    extraHTML: `
+      <div class="columns">
+        <div class="col">
+          <div class="num">01 / What</div>
+          <h3>Read-only</h3>
+          <p>A read-only interface to everything that exists in the platform.</p>
+        </div>
+        <div class="col">
+          <div class="num">02 / Scope</div>
+          <h3>No writes</h3>
+          <p>It doesn't create or modify anything.</p>
+        </div>
+        <div class="col">
+          <div class="num">03 / Output</div>
+          <h3>Structured view</h3>
+          <p>Exposes assets and their relationships in a consistent, usable form.</p>
+        </div>
+      </div>
+    `,
+    scene: () => ({
+      nodes: fSphere(N, 6.4),
+      edges: [],
+      colors: Array(N).fill(AMBER),
+      camera: { pos: [0, 0, 15], look: [0, 0, 0] },
+      bloom: 1.55
+    })
   },
   {
     section: '§04 · The Problem',
