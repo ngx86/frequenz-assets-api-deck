@@ -732,23 +732,17 @@ const slideDefs = [
     eyebrow: '§09 — Thank you',
     title: 'Thank <i>you</i>',
     extraClass: 'centered',
-    scene: () => {
-      const pos = fConcentric();
-      const cs = [];
-      const counts = [8, 16, 24, 32];
-      const ringColors = [AMBER_HI, AMBER, CYAN, AMBER];
-      let idx = 0;
-      for (let r = 0; r < counts.length; r++) {
-        for (let i = 0; i < counts[r]; i++) cs.push(ringColors[r]);
-      }
-      return {
-        nodes: pos,
-        edges: edgesConcentric(),
-        colors: cs,
-        camera: { pos: [4, 5, 9], look: [0, 0, 0] },
-        bloom: 2.2
-      };
-    }
+    scene: () => ({
+      nodes: fConcentric(),
+      edges: edgesConcentric(),
+      colors: (() => {
+        const cs = []; const counts = [8,16,24,32]; const ringColors = [AMBER_HI,AMBER,CYAN,AMBER];
+        for (let r = 0; r < counts.length; r++) for (let i = 0; i < counts[r]; i++) cs.push(ringColors[r]);
+        return cs;
+      })(),
+      camera: { pos: [4, 5, 9], look: [0, 0, 0] },
+      bloom: 2.2
+    })
   }
 ];
 
@@ -789,6 +783,60 @@ function applyScene(def) {
   gsap.to(nodeMat, { opacity: isIntro ? 0 : 1, duration: isIntro ? 0.2 : 0.8, delay: isIntro ? 0 : 0.3 });
   if (!isIntro) gsap.to(nodeMat, { opacity: 0.08, duration: 1.8, ease: 'power2.inOut', delay: 1.2 });
   gsap.to(bloom, { strength: s.bloom * 0.7, duration: 1.6, ease: 'power2.inOut' });
+}
+
+/* ---------------- thank-you formation cycle ---------------- */
+const THANK_FORMATIONS = [
+  () => ({ nodes: fConcentric(),   edges: edgesConcentric(),         colors: (() => { const cs=[],counts=[8,16,24,32],cols=[AMBER_HI,AMBER,CYAN,AMBER]; for(let r=0;r<counts.length;r++) for(let i=0;i<counts[r];i++) cs.push(cols[r]); return cs; })() }),
+  () => ({ nodes: fSphere(N, 6.4), edges: edgesNearest(fSphere(N,6.4),3), colors: Array(N).fill(AMBER) }),
+  () => ({ nodes: fSpiral(N),      edges: edgesNearest(fSpiral(N),3),     colors: Array(N).fill(AMBER) }),
+  () => ({ nodes: fRing(N, 6),     edges: edgesRingSequence(N),           colors: Array(N).fill(CYAN) }),
+  () => ({ nodes: fBurst(N, 6.8),  edges: [],                             colors: Array(N).fill(AMBER_HI) }),
+  () => ({ nodes: fGrid(N, 10, 1.6), edges: edgesNearest(fGrid(N,10,1.6),2), colors: Array(N).fill(CYAN) }),
+  () => ({ nodes: fDome(N, 5.5),   edges: edgesNearest(fDome(N,5.5),3),  colors: Array(N).fill(AMBER) }),
+  () => ({ nodes: fHub(N, 5.4),    edges: edgesHub(N, 0, 65),            colors: (() => { const cs=Array(N).fill(CYAN); cs[0]=AMBER_HI; return cs; })() }),
+];
+const CYCLE_CAM = [
+  { pos: [4, 5, 9],   look: [0,0,0] },
+  { pos: [0, 0, 13],  look: [0,0,0] },
+  { pos: [8, 3, 8],   look: [0,0,0] },
+  { pos: [0, 8, 10],  look: [0,0,0] },
+  { pos: [-5, 4, 10], look: [0,0,0] },
+  { pos: [0, 2, 14],  look: [0,0,0] },
+  { pos: [6, 6, 7],   look: [0,0,0] },
+  { pos: [0, 0, 12],  look: [0,0,0] },
+];
+
+let cycleTimer = null;
+let cycleFormIdx = 0;
+
+function morphToFormation(f, cam) {
+  for (let i = 0; i < N; i++) {
+    gsap.to(curr[i], { x: f.nodes[i].x, y: f.nodes[i].y, z: f.nodes[i].z,
+      duration: 2.2, ease: 'power3.inOut', delay: (i / N) * 0.45 });
+    const c = new THREE.Color(f.colors[i] || AMBER);
+    gsap.to(currColor[i], { r: c.r, g: c.g, b: c.b, duration: 1.6, ease: 'power2.inOut', delay: 0.3 });
+  }
+  edgeList = f.edges || [];
+  gsap.fromTo(edgeMat, { opacity: 0 },
+    { opacity: edgeList.length ? 0.32 : 0, duration: 1.2, ease: 'power2.out', delay: 0.4 });
+  gsap.to(camera.position, { x: cam.pos[0], y: cam.pos[1], z: cam.pos[2], duration: 2.4, ease: 'power3.inOut' });
+  gsap.to(camTarget, { x: cam.look[0], y: cam.look[1], z: cam.look[2], duration: 2.4, ease: 'power3.inOut' });
+}
+
+function startThankYouCycle() {
+  cycleFormIdx = 0;
+  function step() {
+    if (currentIdx !== slideDefs.length - 1) return;
+    cycleFormIdx = (cycleFormIdx + 1) % THANK_FORMATIONS.length;
+    morphToFormation(THANK_FORMATIONS[cycleFormIdx](), CYCLE_CAM[cycleFormIdx]);
+    cycleTimer = setTimeout(step, 3800);
+  }
+  cycleTimer = setTimeout(step, 3200);
+}
+
+function stopThankYouCycle() {
+  if (cycleTimer) { clearTimeout(cycleTimer); cycleTimer = null; }
 }
 
 /* ---------------- text rendering ---------------- */
@@ -896,6 +944,7 @@ function renderText(i, isInitial) {
 
 function go(i) {
   if (i < 0 || i >= slideDefs.length || i === currentIdx) return;
+  stopThankYouCycle();
   const isInitial = currentIdx === -1;
   currentIdx = i;
   const def = slideDefs[i];
@@ -905,6 +954,7 @@ function go(i) {
     String(i + 1).padStart(2, '0') + ' / ' + String(slideDefs.length).padStart(2, '0');
   document.getElementById('section-label').textContent = def.section;
   [...document.querySelectorAll('#progress .p')].forEach((p, j) => p.classList.toggle('on', j === i));
+  if (i === slideDefs.length - 1) startThankYouCycle();
 }
 
 const prog = document.getElementById('progress');
