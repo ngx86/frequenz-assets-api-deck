@@ -823,7 +823,7 @@ function applyScene(def) {
   );
   const isIntro = s.bloom < 0.05;
   gsap.to(nodeMat, { opacity: isIntro ? 0 : 1, duration: isIntro ? 0.2 : 0.8, delay: isIntro ? 0 : 0.3 });
-  if (!isIntro) gsap.to(nodeMat, { opacity: 0.15, duration: 1.8, ease: 'power2.inOut', delay: 1.2 });
+  if (!isIntro) gsap.to(nodeMat, { opacity: 0.08, duration: 1.8, ease: 'power2.inOut', delay: 1.2 });
   gsap.to(bloom, { strength: s.bloom * 0.7, duration: 1.6, ease: 'power2.inOut' });
 }
 
