@@ -643,37 +643,6 @@ const slideDefs = [
     }
   },
   {
-    section: '§07 · Current scope',
-    eyebrow: '§07 — Current scope',
-    title: 'A <i>foundation</i> layer.',
-    extraHTML: `
-      <div class="columns">
-        <div class="col">
-          <div class="num">01 / Constraint</div>
-          <h3>Read-only</h3>
-          <p>No create, update, or delete. The API observes — it doesn't act.</p>
-        </div>
-        <div class="col">
-          <div class="num">02 / Scope</div>
-          <h3>Microgrids first</h3>
-          <p>Currently focused on microgrids and their components. More to come.</p>
-        </div>
-        <div class="col">
-          <div class="num">03 / Dependency</div>
-          <h3>Data quality</h3>
-          <p>Output quality depends on the platform data underneath — garbage in, garbage out.</p>
-        </div>
-      </div>
-    `,
-    scene: () => ({
-      nodes: fDome(N, 5),
-      edges: [],
-      colors: Array(N).fill(AMBER),
-      camera: { pos: [0, 1, 12], look: [0, 0, 0] },
-      bloom: 1.35
-    })
-  },
-  {
     section: '§08 · What\'s next',
     eyebrow: '§08 — What\'s next',
     title: 'Beyond <i>microgrids</i>.',
